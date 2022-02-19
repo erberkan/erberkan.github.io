@@ -6,16 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Time to get promotedUser management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc.  An attacker,">
+    <meta name="description" content="Backup Operators -&gt; Domain AdminUser management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Backup Operators can also become Domain Admin">
 <meta property="og:url" content="https://erberkan.github.io/2022/backupoperator2da/index.html">
 <meta property="og:site_name" content="B3R-SEC">
-<meta property="og:description" content="Time to get promotedUser management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc.  An attacker,">
+<meta property="og:description" content="Backup Operators -&gt; Domain AdminUser management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc.">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/01.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/02.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/03.PNG">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/04.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/05.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/BackupOperator2DA/06.png">
 <meta property="article:published_time" content="2022-02-19T20:55:27.000Z">
-<meta property="article:modified_time" content="2022-02-19T15:08:13.625Z">
+<meta property="article:modified_time" content="2022-02-19T15:40:01.555Z">
 <meta property="article:author" content="B3R">
 <meta property="article:tag" content="redteamops,penetrationtesting">
 <meta name="twitter:card" content="summary">
@@ -111,7 +116,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Time-to-get-promoted"><span class="toc-number">1.</span> <span class="toc-text">Time to get promoted</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Backup-Operators-gt-Domain-Admin"><span class="toc-number">1.</span> <span class="toc-text">Backup Operators -&gt; Domain Admin</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -155,7 +160,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h2 id="Time-to-get-promoted"><a href="#Time-to-get-promoted" class="headerlink" title="Time to get promoted"></a>Time to get promoted</h2><p>User management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc. </p>
+    <h2 id="Backup-Operators-gt-Domain-Admin"><a href="#Backup-Operators-gt-Domain-Admin" class="headerlink" title="Backup Operators -&gt; Domain Admin"></a>Backup Operators -&gt; Domain Admin</h2><p>User management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc. </p>
 <p>An attacker, If you get any priviledge user’s password or NT/LM hash, you can take the domain of company. </p>
 <p>In this article, I will handle users who has member of <code>Backup Operators</code> group.</p>
 <p>Normally, tech staff uses Backup Operators group for takes backup of files, folders etc. Here is the a backup operator user;</p>
@@ -166,6 +171,21 @@
 </ul>
 <p>Let’s imagine, as an attacker has this user’s password as clear-text or NT/LM hash. We can read any files or folders on any machines that in domain. (Evil laugh)</p>
 <p>We can also access the <code>SAM</code>, <code>SYSTEM</code> and <code>SECURITY</code> files on the machine. That’s the point..</p>
+<p>We can use below solution for dump SAM, SYSTEM and SECURITY files of Domain Controller server and write them on any remote share. </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/mpgn/BackupOperatorToDA">https://github.com/mpgn/BackupOperatorToDA</a></li>
+</ul>
+<p><img src="BackupOperator2DA/02.png"></p>
+<p>Perfect ! We has already access to <code>\\ACMEDC\C$</code> drive and get these files on our local and let’s read SAM file !</p>
+<p><img src="BackupOperator2DA/03.PNG"></p>
+<p>Impacket - secretsdump is perfect tools for read SAM file. </p>
+<p><img src="BackupOperator2DA/04.png"></p>
+<p>As you see, We has <code>Administrator</code> user of ACME domain. If default <code>Administrator</code> user is disable ?! </p>
+<p><strong>As an attacker, We have already multiple attack vector.</strong></p>
+<p>We can user <code>$MACHINE.ACC</code> hash for getting all users of ACME domain via ACMEDC.</p>
+<p><img src="BackupOperator2DA/05.png"></p>
+<p>Cheers !</p>
+<p><img src="BackupOperator2DA/06.png"></p>
 
   </div>
 </article>
@@ -189,7 +209,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Time-to-get-promoted"><span class="toc-number">1.</span> <span class="toc-text">Time to get promoted</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Backup-Operators-gt-Domain-Admin"><span class="toc-number">1.</span> <span class="toc-text">Backup Operators -&gt; Domain Admin</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
