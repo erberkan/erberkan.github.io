@@ -13,18 +13,18 @@
 <meta property="og:site_name" content="B3R-SEC">
 <meta property="og:description" content="Backup Operators -&gt; Domain AdminUser management is a huge issue for enterprise tech staffs. There is alot of user to manage like local machine users, service users, domain admins, backup users etc.">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/01.png">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/02.png">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/03.PNG">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/04.png">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/05.png">
-<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/06.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/01.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/02.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/03.PNG">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/04.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/05.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/backupoperator2da/06.png">
 <meta property="article:published_time" content="2022-02-19T20:55:27.000Z">
-<meta property="article:modified_time" content="2022-02-19T15:56:44.674Z">
+<meta property="article:modified_time" content="2022-02-19T16:00:23.364Z">
 <meta property="article:author" content="B3R">
 <meta property="article:tag" content="redteamops">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://erberkan.github.io/2022/backupoperator2da/backupOperator2da/01.png">
+<meta name="twitter:image" content="https://erberkan.github.io/2022/backupoperator2da/01.png">
     
     
         
@@ -164,7 +164,7 @@
 <p>An attacker, If you get any priviledge user’s password or NT/LM hash, you can take the domain of company. </p>
 <p>In this article, I will handle users who has member of <code>Backup Operators</code> group.</p>
 <p>Normally, tech staff uses Backup Operators group for takes backup of files, folders etc. Here is the a backup operator user;</p>
-<p><img src="backupOperator2da/01.png"></p>
+<p><img src="/2022/backupoperator2da/01.png"></p>
 <p>As you see the user only member of <code>Domain Users</code> and <code>Backup Operators</code>. So, this user can access only access the machine locally and read files and folders. </p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/active-directory-security-groups#bkmk-backupoperators">https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/active-directory-security-groups#bkmk-backupoperators</a></li>
@@ -175,17 +175,17 @@
 <ul>
 <li><a target="_blank" rel="noopener" href="https://github.com/mpgn/BackupOperatorToDA">https://github.com/mpgn/BackupOperatorToDA</a></li>
 </ul>
-<p><img src="backupOperator2da/02.png"></p>
+<p><img src="/2022/backupoperator2da/02.png"></p>
 <p>Perfect ! We has already access to <code>\\ACMEDC\C$</code> drive and get these files on our local and let’s read SAM file !</p>
-<p><img src="backupOperator2da/03.PNG"></p>
+<p><img src="/2022/backupoperator2da/03.PNG"></p>
 <p>Impacket - secretsdump is perfect tools for read SAM file. </p>
-<p><img src="backupOperator2da/04.png"></p>
+<p><img src="/2022/backupoperator2da/04.png"></p>
 <p>As you see, We has <code>Administrator</code> user of ACME domain. If default <code>Administrator</code> user is disable ?! </p>
 <p><strong>As an attacker, We have already multiple attack vector.</strong></p>
 <p>We can user <code>$MACHINE.ACC</code> hash for getting all users of ACME domain via ACMEDC.</p>
-<p><img src="backupOperator2da/05.png"></p>
+<p><img src="/2022/backupoperator2da/05.png"></p>
 <p>Cheers !</p>
-<p><img src="backupOperator2da/06.png"></p>
+<p><img src="/2022/backupoperator2da/06.png"></p>
 
   </div>
 </article>
