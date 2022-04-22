@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-10.png">
 <meta property="og:image" content="https://erberkan.github.io/2022/ca-misconfigure-template/ca-0.jpg">
 <meta property="article:published_time" content="2022-04-22T20:55:27.000Z">
-<meta property="article:modified_time" content="2022-04-22T20:59:11.529Z">
+<meta property="article:modified_time" content="2022-04-22T21:08:44.263Z">
 <meta property="article:author" content="B3R">
 <meta property="article:tag" content="redteamops">
 <meta name="twitter:card" content="summary">
@@ -198,7 +198,7 @@
 <p>And final step is request a TGT by using this certificate that encoded with base64 and then import the ticket.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\bin\Rubeus.exe asktgt &#x2F;user:zeus &#x2F;certificate:MIIMbwIBAzCCDDUGCSqGByPcK&#x2F;zZw0OjCIln5Fz3 --snip-- +KvcECJ04lN89sU7mAgIIAA&#x3D;&#x3D; &#x2F;password:password</span><br></pre></td></tr></table></figure>
 <p><img src="/2022/ca-misconfigure-template/ca-9.png"></p>
-<p>Ta-da! We now have Domain Admin permissions. Let’s access the Domain Controller’s C$ and create a user and add it to the Domain Admins group member. </p>
+<p>Ta-da! We have Domain Admin permissions. Let’s access the Domain Controller’s C$ and create a user and add it to the Domain Admins group member. </p>
 <p><img src="/2022/ca-misconfigure-template/ca-10.png"></p>
 <h2 id="I-AM-THE-AUTHORITY"><a href="#I-AM-THE-AUTHORITY" class="headerlink" title="I AM THE AUTHORITY !"></a>I AM THE AUTHORITY !</h2><p><img src="/2022/ca-misconfigure-template/ca-0.jpg"></p>
 <p>Cheers !</p>
