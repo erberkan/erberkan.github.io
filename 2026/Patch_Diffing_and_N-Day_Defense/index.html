@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="When a vendor ships a security patch, most teams exhale. The bug has a name now, and a fix is available. But for anyone watching from the other side, that’s exactly when the interesting work begins. T">
+<meta property="og:type" content="article">
+<meta property="og:title" content="When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense">
+<meta property="og:url" content="https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/index.html">
+<meta property="og:site_name" content="B3R-SEC">
+<meta property="og:description" content="When a vendor ships a security patch, most teams exhale. The bug has a name now, and a fix is available. But for anyone watching from the other side, that’s exactly when the interesting work begins. T">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/CVE-2026-42536.jpeg">
+<meta property="article:published_time" content="2026-09-13T20:55:27.000Z">
+<meta property="article:modified_time" content="2026-09-13T18:56:56.477Z">
+<meta property="article:author" content="B3R">
+<meta property="article:tag" content="vulnerability-research, patch-diffing, ai-security, apache, CVE-2026-42536">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/CVE-2026-42536.jpeg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+
+    <!--
+      01100011 01100101 01110010 01100011 01100001 00100000 01110100 01110010 01101111 01110110 01100001
+    -->
+
+    <!-- title -->
+    <title>When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/exploits">Exploits</a></li>
+         
+          <li><a href="/archives/">Posts</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2026/clipboard-thief/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&text=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&is_video=false&description=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense&body=Check out this article: https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&name=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&t=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-Patch-Diffing-Actually-Is"><span class="toc-number">1.</span> <span class="toc-text">What Patch Diffing Actually Is</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Why-the-Numbers-Demand-Taking-This-Seriously"><span class="toc-number">2.</span> <span class="toc-text">Why the Numbers Demand Taking This Seriously</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Where-AI-Fits-in-the-Workflow"><span class="toc-number">3.</span> <span class="toc-text">Where AI Fits in the Workflow</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Prior-art-worth-crediting-PatchDiff-AI-by-Akamai"><span class="toc-number">3.1.</span> <span class="toc-text">Prior art worth crediting: PatchDiff-AI by Akamai</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Case-Study-CVE-2026-42536"><span class="toc-number">4.</span> <span class="toc-text">Case Study: CVE-2026-42536</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Bug"><span class="toc-number">4.1.</span> <span class="toc-text">The Bug</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Diff-to-Hypothesis-Step"><span class="toc-number">4.2.</span> <span class="toc-text">The Diff-to-Hypothesis Step</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Building-the-PoC"><span class="toc-number">4.3.</span> <span class="toc-text">Building the PoC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Token-Economics"><span class="toc-number">4.4.</span> <span class="toc-text">The Token Economics</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Bigger-Point"><span class="toc-number">5.</span> <span class="toc-text">The Bigger Point</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">6.</span> <span class="toc-text">References</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">B3R-SEC</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-09-13T20:55:27.000Z" itemprop="datePublished">2026-09-13</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/vulnerability-research-patch-diffing-ai-security-apache-CVE-2026-42536/" rel="tag">vulnerability-research, patch-diffing, ai-security, apache, CVE-2026-42536</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>When a vendor ships a security patch, most teams exhale. The bug has a name now, and a fix is available. But for anyone watching from the other side, that’s exactly when the interesting work begins. The diff between the vulnerable and fixed versions — a new bounds check here, a changed function call there — often says more than the advisory ever will. That gap between “patch is out” and “risk is actually gone” is where N-Day attacks live. And closing that gap faster is, in my view, what AI has genuinely earned its place doing in security.</p>
+<p>This post covers three things: what patch diffing actually is, why the industry data makes it hard to justify ignoring, and then the part I find most valuable to write up — a concrete walkthrough of how I used AI to develop a proof-of-concept for <strong>CVE-2026-42536</strong>, a heap-based buffer overflow in Apache HTTP Server’s <code>mod_xml2enc</code> module.</p>
+<hr>
+<h2 id="What-Patch-Diffing-Actually-Is"><a href="#What-Patch-Diffing-Actually-Is" class="headerlink" title="What Patch Diffing Actually Is"></a>What Patch Diffing Actually Is</h2><p>Patch diffing is comparing a vulnerable version of a binary (or source file) against its patched version to find the security-relevant change. A patch is, in practice, a partial vulnerability disclosure — vendors rarely explain <em>why</em> a function changed, but the diff shows you exactly what moved. That’s the core insight: if you can identify which function was fixed and what the fix added, you’ve already answered most of the hard questions about an exploit.</p>
+<p>This matters because the most expensive part of N-Day research isn’t writing the exploit — it’s finding where to look. On a product like Apache HTTP Server, you’re dealing with hundreds of source files and a patch that touches a handful of lines. Diffing collapses that search problem from days of manual code review to a ranked list of changed functions.</p>
+<p>The same technique works at the binary level for closed-source products. Tools like BinDiff, Diaphora, and Ghidra’s Version Tracking compare compiled binaries function-by-function, flagging additions, modifications, and deletions. What often surprises people the first time they use these tools is how small the signal actually is: a patched Windows cumulative update might touch four or five functions out of several thousand in a single binary. That’s not noise to fight through — that’s the gift. The patch has already done the triage for you. The challenge shifts from “find the bug” to “understand what these five changed functions were doing wrong before, and whether you can reach them.”</p>
+<p>There’s an important practical subtlety here for binary work: you need <em>clean</em> before-and-after versions of the same binary compiled from the same source configuration, not two arbitrary builds that happen to have different version numbers. Recompilation alone introduces address changes, inlined functions, and metadata deltas that look like diffs but mean nothing. This is why Windows patch diffing typically involves extracting specific PE files from within delta or cumulative update packages — getting the same binary at two points in its history — rather than comparing two installers. The overhead of that extraction step is real, and it’s worth automating early if you plan to run this regularly.</p>
+<hr>
+<h2 id="Why-the-Numbers-Demand-Taking-This-Seriously"><a href="#Why-the-Numbers-Demand-Taking-This-Seriously" class="headerlink" title="Why the Numbers Demand Taking This Seriously"></a>Why the Numbers Demand Taking This Seriously</h2><p>The case for patch diffing as a <em>defensive</em> discipline — not just offensive research — is harder to argue against than it was a few years ago.</p>
+<p><strong>The exploitation window has gone negative.</strong> Google’s Threat Intelligence Group has tracked mean time-to-exploit (TTE) going back to 2018, when it sat at 63 days. By 2024 it had crossed zero to roughly <strong>-1 day</strong>. Their 2025 estimate puts it at <strong>-7 days</strong> — attackers are, on average, actively exploiting vulnerabilities <em>before</em> a patch is publicly available. The race defenders thought they were running has already been lost before it starts, on average.</p>
+<p><strong>Exploitation is the top initial-access vector.</strong> Verizon’s 2025 DBIR put vulnerability exploitation at the root of 20% of breaches — the first time it surpassed phishing. The 2026 edition moves that number to 31% and puts exploitation at #1 across all initial-access methods.</p>
+<p><strong>The patch backlog is structural, not a process failure.</strong> Edgescan’s 2025 data shows critical vulnerabilities taking 55–74 days on average to remediate; 45% of enterprise vulnerabilities are still open 12 months later. Over 48,000 CVEs were published in 2025, a ~20% increase on top of 2024’s already-record pace. You can’t treat every CVE with the same urgency, and that means triaging which ones actually matter in <em>your</em> environment — which is exactly what a technical diff analysis answers.</p>
+<p><strong>Edge devices are the current focus for attackers.</strong> Google found that enterprise-facing technology — VPNs, gateways, firewalls — accounted for nearly half of all zero-days exploited in the wild in 2025, the highest share on record. These are also the systems where “just patch it tonight” is least operationally realistic.</p>
+<p>The defensive argument isn’t “do patch diffing so you can write exploits.” It’s “do patch diffing so that when your scanner hasn’t yet released a signature, when your CVSS score says 7.5 but you don’t know if the vulnerable code path is even reachable in your stack, you have something better than guesswork.”</p>
+<hr>
+<h2 id="Where-AI-Fits-in-the-Workflow"><a href="#Where-AI-Fits-in-the-Workflow" class="headerlink" title="Where AI Fits in the Workflow"></a>Where AI Fits in the Workflow</h2><p>AI has earned a specific role here, and it’s worth being precise about what that is: <strong>removing the bottleneck between “here is a diff” and “here is a testable hypothesis.”</strong></p>
+<p>A few data points on what this looks like at scale:</p>
+<ul>
+<li><strong>Google’s Big Sleep</strong> (a DeepMind/Project Zero collaboration) found CVE-2025-6965 — a critical SQLite vulnerability — while threat actors were staging it for exploitation, before it was publicly known. Google described it as the first documented case of an AI agent directly disrupting a real-world exploitation attempt.</li>
+<li><strong>DARPA AIxCC finals (2025):</strong> Seven autonomous systems analyzed 54 million lines of real open-source code. They found 86% of inserted vulnerabilities, automatically patched 68% of those, and caught 18 genuinely unknown real-world bugs — with an average patch generation time of about 45 minutes per task.<br>The common thread isn’t “AI finds exploits for you.” It’s that AI handles the unglamorous triaging work well: ranking which of several hundred changed functions are security-relevant, proposing a testable hypothesis (probable CWE class, preconditions, what observable behavior would confirm it), and drafting a safe verification skeleton. Judgment calls — what to actually run, against what scope, with what authorization — stay human.</li>
+</ul>
+<h3 id="Prior-art-worth-crediting-PatchDiff-AI-by-Akamai"><a href="#Prior-art-worth-crediting-PatchDiff-AI-by-Akamai" class="headerlink" title="Prior art worth crediting: PatchDiff-AI by Akamai"></a>Prior art worth crediting: PatchDiff-AI by Akamai</h3><p>I want to be upfront about something: the idea of using AI to automate patch diffing isn’t something I discovered. I’ve been working on patch diffing as a discipline for a while, and when I started thinking about how to bring AI into that workflow, I eventually found that Akamai’s security research team had already built exactly what I was conceptualizing — properly, at scale, and with rigorous evaluation behind it.</p>
+<p>Maor Dahan published <strong><a target="_blank" rel="noopener" href="https://github.com/akamai/patchdiff-ai">PatchDiff-AI</a></strong> in December 2025 (<a target="_blank" rel="noopener" href="https://www.akamai.com/blog/security-research/patch-wednesday-root-cause-analysis-with-llms">write-up here</a>): a multi-agent system that ingests Microsoft Patch Tuesday KB updates and generates automated root-cause analysis reports. The architecture runs three agents in sequence — a Windows internals agent backed by a RAG vector store, a reverse engineering agent that handles binary diffing and disassembly, and a vulnerability research agent that synthesizes the final report. Their evaluation numbers are the kind you want to see before trusting a system like this in practice:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Correct executable identified</td>
+<td>88.6%</td>
+</tr>
+<tr>
+<td>Correct vulnerable function found</td>
+<td>83.9%</td>
+</tr>
+<tr>
+<td>Root cause correctly explained</td>
+<td>71.4%</td>
+</tr>
+<tr>
+<td>LLM accuracy when correct code block is in context</td>
+<td>~96%</td>
+</tr>
+<tr>
+<td>Average cost per report</td>
+<td>$0.14</td>
+</tr>
+<tr>
+<td>Reports generated (3 Patch Tuesday cycles)</td>
+<td>131</td>
+</tr>
+</tbody></table>
+<p>That’s not a demo — it’s a validated pipeline at production cadence, and it’s open source under the <a target="_blank" rel="noopener" href="https://github.com/akamai/patchdiff-ai">Akamai GitHub repository</a>.</p>
+<p>The reason I’m still writing about my own process for CVE-2026-42536 is scope: PatchDiff-AI is built around Windows closed-source binaries delivered via Patch Tuesday, while my work here started from Apache’s open-source diff and moved toward a controlled crash reproducer for a specific Linux-facing module. Different surface, different toolchain, same underlying conviction. If you’re doing this kind of work against Microsoft’s ecosystem, their repository is where to start — not here.</p>
+<hr>
+<h2 id="Case-Study-CVE-2026-42536"><a href="#Case-Study-CVE-2026-42536" class="headerlink" title="Case Study: CVE-2026-42536"></a>Case Study: CVE-2026-42536</h2><p>To make all of this less abstract, here’s a real one I worked through: <strong>CVE-2026-42536</strong>, a heap-based out-of-bounds write in Apache HTTP Server’s <code>mod_xml2enc</code> module. It affects Apache 2.4.0 through 2.4.67 and is fixed in 2.4.68. CVSS 7.5, network-accessible, no authentication required — the kind of vulnerability that matters immediately on any internet-facing Apache deployment using XML content filtering via proxied backends.</p>
+<h3 id="The-Bug"><a href="#The-Bug" class="headerlink" title="The Bug"></a>The Bug</h3><p>The root cause sits in how <code>mod_xml2enc</code> handles the <code>xml2StartParse</code> directive. This directive tells the module to skip content before a configured start element (e.g., <code>html</code>). The internal function <code>fix_skipto()</code> advances the output-buffer pointer <code>ctx-&gt;buf</code> by the number of skipped bytes and subtracts that offset from <code>ctx-&gt;bytes</code> (the amount of remaining valid data). The bug: it does <strong>not</strong> subtract the same offset from <code>ctx-&gt;bblen</code> — the total advertised output capacity.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Apache 2.4.67 — fix_skipto(), the vulnerable state */</span></span><br><span class="line">ctx-&gt;bytes -= (p - ctx-&gt;buf);</span><br><span class="line">ctx-&gt;buf = p;</span><br><span class="line"><span class="comment">/* ctx-&gt;bblen still reflects the original allocation size */</span></span><br></pre></td></tr></table></figure>
+
+<p>The fix is a single line:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Apache 2.4.68 — the patch */</span></span><br><span class="line">ctx-&gt;bytes -= (p - ctx-&gt;buf);</span><br><span class="line">ctx-&gt;bblen -= (p - ctx-&gt;buf);   <span class="comment">/* ← this line did not exist before */</span></span><br><span class="line">ctx-&gt;buf = p;</span><br></pre></td></tr></table></figure>
+
+<p>With the stale capacity, any downstream charset conversion that expands bytes can write past the end of the actual remaining space. The conversion receives <code>ctx-&gt;bblen</code> as its output budget but only <code>ctx-&gt;buf</code>-onward as valid memory. The diff makes the entire scope of the bug immediately readable — one missing line in one function is the entire vulnerability.</p>
+<h3 id="The-Diff-to-Hypothesis-Step"><a href="#The-Diff-to-Hypothesis-Step" class="headerlink" title="The Diff-to-Hypothesis Step"></a>The Diff-to-Hypothesis Step</h3><p>This is where AI accelerated things meaningfully. After isolating the patch, I fed the relevant source context — <code>xml2enc.c</code>, the <code>fix_skipto</code> function before and after, the adjacent call sites — to the model and asked for a hypothesis: what class of bug, what preconditions, what an observable trigger would look like.</p>
+<p>The model’s output wasn’t “here is your exploit.” It was a structured hypothesis: probable CWE-122 (heap buffer overflow), trigger precondition is a backend response with a charset that expands byte-for-byte (multibyte encoding such as UTF-8 from CP1252 would do it), and the size of the skip offset determines how large the stale capacity mismatch can grow. That narrowed the problem from “find a bug in Apache” to “design a payload with these three specific properties.”</p>
+<p>This is the part of the workflow worth investing in: not using AI to generate working exploits, but using it to collapse a large hypothesis space into something you can actually test.</p>
+<h3 id="Building-the-PoC"><a href="#Building-the-PoC" class="headerlink" title="Building the PoC"></a>Building the PoC</h3><p>The proof-of-concept uses a two-component topology that mirrors how the vulnerability is triggered in practice:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">poc.py client  →  vulnerable Apache (port 18080)  →  payload backend in poc.py (port 18081)</span><br></pre></td></tr></table></figure>
+
+<p>Apache must have <code>mod_proxy</code>, <code>mod_proxy_http</code>, <code>mod_xml2enc</code>, and <code>mod_filter</code> loaded, with a configuration that routes a path through <code>xml2enc</code> filtering:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">&lt;Location /cve-2026-42536/&gt;</span></span><br><span class="line">    <span class="attribute">SetOutputFilter</span> xml<span class="number">2</span>enc</span><br><span class="line">    <span class="attribute">xml2StartParse</span> html</span><br><span class="line"><span class="section">&lt;/Location&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>The payload backend (<code>PayloadHandler</code> in <code>poc.py</code>) returns a response crafted for maximum mismatch:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">prefix = <span class="string">b&quot;J&quot;</span> * self.server.skip_bytes       <span class="comment"># 2,048 bytes — skipped by xml2StartParse</span></span><br><span class="line">expanding_data = <span class="string">b&quot;\x80&quot;</span> * self.server.expand_bytes  <span class="comment"># 12,288 bytes of CP1252 0x80</span></span><br><span class="line">body = prefix + <span class="string">b&quot;&lt;html&gt;&lt;body&gt;&quot;</span> + expanding_data + <span class="string">b&quot;&lt;/body&gt;&lt;/html&gt;&quot;</span></span><br><span class="line"> </span><br><span class="line">self.send_header(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/html; charset=windows-1252&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>The <code>\x80</code> byte is <code>charset=windows-1252</code>‘s encoding of the euro sign (€), which expands to a three-byte UTF-8 sequence. With a 2,048-byte skip creating that same amount of stale capacity in <code>ctx-&gt;bblen</code>, the conversion can write well past the actual remaining buffer. The result on a vulnerable build: heap memory corruption, followed by a worker SIGSEGV.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AH01434  character-set conversion selected</span><br><span class="line">AH01428  skipped to the first configured element</span><br><span class="line">AH01441  conversion performed</span><br><span class="line">AH00052  child process exited on signal 11 (SIGSEGV)</span><br></pre></td></tr></table></figure>
+
+<p>Transport failure alone isn’t proof — a network hiccup can look the same. The crash needs to be confirmed in the Apache error log, system journal, or a core dump. The negative control is identical: same configuration, Apache 2.4.68, same payload. The backend still gets the request; the worker doesn’t crash, because <code>ctx-&gt;bblen</code> is now kept accurate.</p>
+<p>A safety note worth stating explicitly: the script defaults to loopback-only operation. It rejects non-loopback targets unless <code>--allow-remote</code> is explicitly supplied, and that flag isn’t authorization — it’s just a deliberate acknowledgment that you’ve set up an isolated lab you actually own.</p>
+<p><img src="/2026/Patch_Diffing_and_N-Day_Defense/CVE-2026-42536.jpeg"></p>
+<p>PoC Code: <a target="_blank" rel="noopener" href="https://github.com/erberkan/CVE-2026-42536-PoC">https://github.com/erberkan/CVE-2026-42536-PoC</a></p>
+<h3 id="The-Token-Economics"><a href="#The-Token-Economics" class="headerlink" title="The Token Economics"></a>The Token Economics</h3><p>One part of this process I find worth sharing as a data point: what the AI-assisted iteration actually cost in compute terms.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Model: gpt-daybreak-blue-latest</span><br><span class="line"> </span><br><span class="line">Total tokens:           27,932,071</span><br><span class="line">Input tokens:           27,854,667</span><br><span class="line">  — from cache:         26,807,929   (96.2% of all input)</span><br><span class="line">Output tokens:              77,404</span><br><span class="line">  — of which reasoning:     32,512</span><br></pre></td></tr></table></figure>
+
+<p>The ratio tells the story more than the total does. <strong>The output was 0.28% of the total token volume.</strong> Almost everything else was context being fed in and, crucially, served from cache rather than re-processed cold — which is what made the iterative loop (refine hypothesis → test → adjust payload → repeat) economically feasible rather than prohibitively expensive.</p>
+<p>A few things drove that cache hit rate: the source diff, the Apache module context, and the conversation history were all stable across iterations. Only the specific question or adjustment changed turn-by-turn. That’s the right way to structure AI-assisted analysis: keep large stable context in the cache, ask focused questions that build on it. The reasoning tokens (32,512) being nearly half the output volume also reflects the model doing genuine step-by-step work on the hypothesis rather than pattern-matching to a cached answer.</p>
+<hr>
+<h2 id="The-Bigger-Point"><a href="#The-Bigger-Point" class="headerlink" title="The Bigger Point"></a>The Bigger Point</h2><p>None of this is about proving AI can write exploits faster — it can, and that’s exactly why “wait for a scanner signature” is no longer a viable default posture. The point is that the same capability, oriented toward defense, closes the gap that actually matters: how fast can your organization go from “a patch dropped” to “we know if we’re actually exposed, and here’s what to do until we can apply it.”</p>
+<p>Patch diffing is how you answer that question technically instead of just hoping the CVSS score is a proxy for your actual risk. AI is what makes it practical to run that process against every significant patch rather than just the ones that get a public PoC before your scanner wakes up.</p>
+<p>Accountable speed, not speed for its own sake. Sandboxed verification, human sign-off on anything that runs against a real target, and a clear audit trail on every AI-generated hypothesis are what separate this from automation going wrong in a noisy direction. The question worth asking isn’t “can AI build exploits?” It’s “how fast can we produce evidence — before someone else does?”</p>
+<hr>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://httpd.apache.org/security/vulnerabilities_24.html#CVE-2026-42536">Apache HTTP Server 2.4 Security Vulnerabilities</a></li>
+<li><a target="_blank" rel="noopener" href="https://nvd.nist.gov/vuln/detail/CVE-2026-42536">CVE-2026-42536 — NVD</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.akamai.com/blog/security-research/patch-wednesday-root-cause-analysis-with-llms">Akamai: Patch Wednesday — Root Cause Analysis with LLMs</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/akamai/patchdiff-ai">PatchDiff-AI — GitHub (akamai/patchdiff-ai)</a></li>
+<li><a target="_blank" rel="noopener" href="https://projectzero.google/2024/10/from-naptime-to-big-sleep.html">Google Project Zero: From Naptime to Big Sleep</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.darpa.mil/news/2025/aixcc-results">DARPA AI Cyber Challenge — Final Results</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.verizon.com/business/resources/reports/2025-dbir-data-breach-investigations-report.pdf">Verizon 2025 Data Breach Investigations Report</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.vulncheck.com/blog/2024-exploitation-trends">VulnCheck: 2024 Trends in Vulnerability Exploitation</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.google.com/blog/topics/threat-intelligence/2024-zero-day-trends">Google GTIG: 2024 Zero-Day Exploitation Trends</a></li>
+<li><a target="_blank" rel="noopener" href="https://hadrian.io/blog/understanding-the-new-negative-time-to-exploit">Hadrian: Understanding Negative Time-to-Exploit</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.08144">LLM Agents can Autonomously Exploit One-day Vulnerabilities — arXiv:2404.08144</a></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/exploits">Exploits</a></li>
+         
+          <li><a href="/archives/">Posts</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-Patch-Diffing-Actually-Is"><span class="toc-number">1.</span> <span class="toc-text">What Patch Diffing Actually Is</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Why-the-Numbers-Demand-Taking-This-Seriously"><span class="toc-number">2.</span> <span class="toc-text">Why the Numbers Demand Taking This Seriously</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Where-AI-Fits-in-the-Workflow"><span class="toc-number">3.</span> <span class="toc-text">Where AI Fits in the Workflow</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Prior-art-worth-crediting-PatchDiff-AI-by-Akamai"><span class="toc-number">3.1.</span> <span class="toc-text">Prior art worth crediting: PatchDiff-AI by Akamai</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Case-Study-CVE-2026-42536"><span class="toc-number">4.</span> <span class="toc-text">Case Study: CVE-2026-42536</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Bug"><span class="toc-number">4.1.</span> <span class="toc-text">The Bug</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Diff-to-Hypothesis-Step"><span class="toc-number">4.2.</span> <span class="toc-text">The Diff-to-Hypothesis Step</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Building-the-PoC"><span class="toc-number">4.3.</span> <span class="toc-text">Building the PoC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Token-Economics"><span class="toc-number">4.4.</span> <span class="toc-text">The Token Economics</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Bigger-Point"><span class="toc-number">5.</span> <span class="toc-text">The Bigger Point</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">6.</span> <span class="toc-text">References</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&text=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&is_video=false&description=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense&body=Check out this article: https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&title=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&name=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://erberkan.github.io/2026/Patch_Diffing_and_N-Day_Defense/&t=When the Patch Drops, the Clock Starts_ AI-Assisted Patch Diffing and N-Day Defense"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    B3R
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/exploits">Exploits</a></li>
+         
+          <li><a href="/archives/">Posts</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <!--
+      <script type="text/javascript">
+          (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-162750585-1', 'auto');
+          ga('send', 'pageview');
+      </script>
+    -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162750585-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-162750585-1');
+    </script>
+
+
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
